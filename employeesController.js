@@ -82,11 +82,63 @@ const getEmployeesByPage = async (req, res) => {
   return res.status(200).json(employees)
 }
 
+const getOldestEmployee = async (req, res) => {
+  let employee = null;
+  const findOldestEmployee = (employees) => {
+    return employees.reduce((oldest, current) => {
+      if (current.age > oldest.age) {
+        return current;
+      } else {
+        return oldest;
+      }
+    });
+  };
+  try {
+      const data = await fs.promises.readFile(employeesFilePath, 'utf8');
+      const jsonData = JSON.parse(data);
+      employee = findOldestEmployee(jsonData);
+  } catch(error) {
+      if (!employee) {
+          return res.status(404).json({ message: 'No se encontró ningún empleado' });
+        } else {
+          res.status(400).json({message: 'Huvo un error al tratar de obtener los empleador'})
+        }
+  }
+  console.log(employee)
+  return res.status(200).json(employee)
+}
+
+const getEmployeeWithPrivileges = async (req, res) => {
+  let employees = [];
+  const privileges = req.query.user;
+  try {
+      const data = await fs.promises.readFile(employeesFilePath, 'utf8');
+      const jsonData = JSON.parse(data);
+      if(privileges === 'true') {
+        for(let i in jsonData) {
+          if(jsonData[i].privileges == "user") {
+            employees.push(jsonData[i])
+          }
+        }
+      }
+  } catch(error) {
+      if (employees.length === 0) {
+          return res.status(404).json({ message: 'No se encontró ningún empleado' });
+        } else {
+          res.status(400).json({message: 'Huvo un error al tratar de obtener los empleador'})
+        }
+  }
+  console.log(employees)
+  return res.status(200).json(employees)
+}
+
 module.exports = {
     getAllEmployees,
     getEmployeesPageOne,
     getEmployeesPageTwo,
-    getEmployeesByPage
+    getEmployeesByPage,
+    getOldestEmployee,
+    getEmployeeWithPrivileges
   };
 
   
