@@ -13,6 +13,9 @@ app.use(morgan('dev'));
 app.use(cors());
 
 //Rutas
+const employeesRoutes = require('./employeesRoutes')
+app.use('/api', employeesRoutes)
+
 app.get('/', (req, res) => {
     res.send('Servidor en linea');
 })
